@@ -26,8 +26,6 @@ const config = {
 }
 
 // export default new Phaser.Game(config)
-let referrer = document.referrer
-window.location=referrer
 
 window.addEventListener('load', () => {
 	new Phaser.Game(config)

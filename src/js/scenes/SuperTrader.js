@@ -14,7 +14,7 @@ export default class SuperTraderScene extends Phaser.Scene
     this.user = {
       userName : data.userName,
       // initMoney : data.money,
-      initMoney : 1000,
+      initMoney : 10,
       initAssets : 0,
       totalTrades : 0,
 
@@ -123,13 +123,19 @@ export default class SuperTraderScene extends Phaser.Scene
     this.gameOverMusic = this.sound.add('gameOverMusic')
     this.powerUpPopUpSound = this.sound.add('chaChing', 1)
     this.powerDownPopUpSound = this.sound.add('beepOnce', 1)
-    this.ambience = this.sound.add('ambience', 0.5)
+    // Try to add ambience audio with error handling
+    try {
+      this.ambience = this.sound.add('ambience', 0.5)
+      this.ambience.play()
+      this.ambience.loop = true
+    } catch (error) {
+      console.log('Ambience audio failed to load, continuing without background music')
+      this.ambience = null
+    }
     this.priceTick = this.sound.add('tick',1)
     this.buySound = this.sound.add('notification', 1)
     this.sellSound = this.sound.add('money',1)
     this.errorSound = this.sound.add('error',1)
-    this.ambience.play()
-    this.ambience.loop = true
     
     //create listeners for events
     
@@ -548,14 +554,24 @@ export default class SuperTraderScene extends Phaser.Scene
     if ((_localMoney < 0.01) && (_localAssets < 0.01)){
       this.scene.stop()
       console.log('game over')
-      this.ambience.stop()
+      if (this.ambience) {
+        this.ambience.stop()
+      }
       this.gameOverMusic.play()
-      this.scene.launch('GameOver', {
-        userDetails:this.activeUser, 
-        tradeDetails:this.allTrades, 
-        timeAlive:this.activeUser.timeAlive,
-        inflation:this.globalSettings.inflation
-      })
+      let dataObject = {
+        userDetails: this.activeUser, 
+        tradeDetails: this.allTrades, 
+        timeAlive: this.activeUser.timeAlive,
+        inflation: this.globalSettings.inflation
+      }
+      // this.scene.launch('GameOver', {
+      //   userDetails:this.activeUser, 
+      //   tradeDetails:this.allTrades, 
+      //   timeAlive:this.activeUser.timeAlive,
+      //   inflation:this.globalSettings.inflation
+      // })
+      this.allTrades = []
+      this.scene.launch('GameOver', dataObject)
     } else if ((_localMoney >= 0.1) || (_localAssets >= 0.1)){
       // console.log('game on')
     }

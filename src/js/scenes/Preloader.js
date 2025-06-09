@@ -57,20 +57,20 @@ export default class Preloader extends Phaser.Scene
         });
         
         //load audio files
-        this.load.audio('ambience',['./assets/audio/effects/ambience.m4a'])
-        this.load.audio('beepOnce',['./assets/audio/effects/beepOnce.wav'])
-        this.load.audio('accept',['./assets/audio/effects/menuAccept.wav'])
-        this.load.audio('tick',['./assets/audio/effects/priceTick.wav'])
-        this.load.audio('selectOk',['./assets/audio/effects/selectBeep.wav'])
-        this.load.audio('textInput',['./assets/audio/effects/textTick.wav'])
-        this.load.audio('secondBeep',['./assets/audio/effects/toneBeep.wav'])
-        this.load.audio('boop',['./assets/audio/effects/boop.wav'])
-        this.load.audio('chaChing',['./assets/audio/effects/chaChing.wav'])
-        this.load.audio('money',['./assets/audio/effects/money.wav'])
-        this.load.audio('notification',['./assets/audio/effects/notification.wav'])
-        this.load.audio('error', ['./assets/audio/effects/error.wav'])
-        this.load.audio('gameOverMusic', ['./assets/audio/soundtrack/motro_interlude.mp3'])
-        this.load.audio('introMusic', ['./assets/audio/soundtrack/motrofoko_2.mp3'])
+        this.load.audio('ambience',['assets/audio/effects/ambience.m4a'])
+        this.load.audio('beepOnce',['assets/audio/effects/beepOnce.wav'])
+        this.load.audio('accept',['assets/audio/effects/menuAccept.wav'])
+        this.load.audio('tick',['assets/audio/effects/priceTick.wav'])
+        this.load.audio('selectOk',['assets/audio/effects/selectBeep.wav'])
+        this.load.audio('textInput',['assets/audio/effects/textTick.wav'])
+        this.load.audio('secondBeep',['assets/audio/effects/toneBeep.wav'])
+        this.load.audio('boop',['assets/audio/effects/boop.wav'])
+        this.load.audio('chaChing',['assets/audio/effects/chaChing.wav'])
+        this.load.audio('money',['assets/audio/effects/money.wav'])
+        this.load.audio('notification',['assets/audio/effects/notification.wav'])
+        this.load.audio('error', ['assets/audio/effects/error.wav'])
+        this.load.audio('gameOverMusic', ['assets/audio/soundtrack/motro_interlude.mp3'])
+        this.load.audio('introMusic', ['assets/audio/soundtrack/motrofoko_2.mp3'])
     }
 
     create(){

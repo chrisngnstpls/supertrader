@@ -9,6 +9,7 @@ export default class Title extends Phaser.Scene{
     init(data){
         this.userName = data.userName
         this.money = data.money
+        
     }
     preload(){
     
@@ -55,6 +56,7 @@ export default class Title extends Phaser.Scene{
             delay:2000,
             repeat:-1
         })
+
         this.backRect = this.add.rectangle(232,232,230,500,0xA5A5A5).setOrigin(0.5)
         this.backRect.alpha = 0.6
         this.backRect.setStrokeStyle(2,0x006722)

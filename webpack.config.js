@@ -54,6 +54,9 @@ module.exports = {
   },
   devServer: {
     static: path.resolve(__dirname, "./dist"),
+    headers: {
+      "Content-Security-Policy": "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; connect-src 'self';"
+    }
   },
   plugins: [
     new CopyWebpackPlugin({

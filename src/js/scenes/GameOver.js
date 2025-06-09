@@ -20,8 +20,8 @@ export default class GameIsOver extends Phaser.Scene
 
     create(){
 
-        var unameText = this.add.text(129,120,`${this.userName} was liquidated `, {fill:'#fff'})
-        var tradesNoText = this.add.text(129,150,`${this.tradesNo} total Trades `, {fill:'#fff'})
+        this.add.text(129,120,`${this.userName} was liquidated `, {fill:'#fff'})
+        this.add.text(129,150,`${this.tradesNo} total Trades `, {fill:'#fff'})
         var inflation = this.add.text(129,180,`inflation : ${this.inflation} `, {fill:'#fff'})
         var timeAlive = this.add.text(129,210,`total seconds lived :${this.timeAlive} `, {fill:'#fff'})
         this.playAgain = this.add.rectangle(232,308,220,70,0xBEBEBE).setOrigin(0.5)
@@ -30,17 +30,21 @@ export default class GameIsOver extends Phaser.Scene
         .setOrigin(0.5)
         .setInteractive({useHandCursor : true})
         .on('pointerover', (pointer) => {
-            this.startBox.fillColor = 0x000000
-            console.log('over')
+
+            this.playAgain.fillColor = 0x000000
         })
         .on('pointerout', (pointer)=>{
-            this.startBox.fillColor = 0xA5A5A5
+
+            this.playAgain.fillColor = 0xA5A5A5
         })
         .on('pointerup', () => {
             this.scene.stop();
             this.game.sound.stopAll()
-            this.scene.launch('SuperTrader', {money:1000, userName:this.userName})    
-            menuAccept.play()
+            this.data.tradeDetails = []
+            console.log(this.data.tradeDetails)
+            this.scene.launch('Title', {money:1000, userName:this.userName})
+              
+            //menuAccept.play()
 
         })
 

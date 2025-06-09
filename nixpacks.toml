@@ -1,6 +1,0 @@
-[providers.node]
-buildCommand = "npm run build"
-startCommand = "npm run serve"
-
-[variables]
-NODE_ENV = "production"

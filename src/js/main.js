@@ -19,8 +19,24 @@ const config = {
 		}
 	},
 	scene: [Preloader,Title,SuperTraderScene,PowerUps,GameIsOver],
-	scale:{
-		zoom:2
+	scale: {
+		mode: Phaser.Scale.FIT,
+		autoCenter: Phaser.Scale.CENTER_BOTH,
+		parent: 'game-container',
+		width: 464,
+		height: 464,
+		min: {
+			width: 320,
+			height: 320
+		},
+		max: {
+			width: 1024,
+			height: 1024
+		}
+	},
+	render: {
+		antialias: false,
+		pixelArt: true
 	},
 
 }

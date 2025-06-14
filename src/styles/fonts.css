@@ -1,0 +1,20 @@
+@font-face {
+    font-family: "Doto";
+    src: url('../assets/fonts/doto/static/Doto-Bold.ttf');
+    font-weight: 700;
+    font-style: normal;
+}
+@font-face {
+    font-family: "Micro";
+    src: url('../assets/fonts/Micro5-Regular.ttf');
+    font-weight: 700;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "Jersey";
+    src: url('../assets/fonts/Jersey20-Regular.ttf');
+    font-weight: 700;
+    font-style: normal;
+}
+

@@ -38,6 +38,8 @@ export default class Preloader extends Phaser.Scene
         
         this.load.image('tiles2', './assets/tiles/tileset_sf.png')
         this.load.tilemapTiledJSON('superTraderDesktop', './assets/tiles/superTraderNew.json')
+        this.load.image('tiles3', './assets/tiles/outdoors.png')
+        this.load.tilemapTiledJSON('gameOverMap', './assets/tiles/gameover.json')
         
         this.load.image('titleBg', './assets/images/titleBg.png');
         this.load.spritesheet('downOnly', './assets/animation/down/downonly2.png',{

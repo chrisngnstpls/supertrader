@@ -13,20 +13,32 @@ export default class GameIsOver extends Phaser.Scene
         this.tradesNo = (data.tradeDetails).length
         this.inflation = (data.inflation).toFixed(2)
         this.timeAlive = (data.timeAlive / 1000).toFixed(2)
+        this.mentalHealth = data.mentalHealth ? data.mentalHealth.toFixed(1) : 0
+        this.gameOverReason = data.mentalHealth <= 0 ? 'mental' : 'liquidated'
     }
     preload(){
         
     }
 
     create(){
+        const overMap = this.make.tilemap({key:'gameOverMap'})
+        const overTileset = overMap.addTilesetImage('outdoors','tiles3')
+        const overBackground = overMap.createLayer('bg', overTileset)
+        // Display different message based on game over reason
+        const gameOverMessage = this.gameOverReason === 'mental' 
+            ? `${this.userName} lost their marbles` 
+            : `${this.userName} was liquidated`;
+        
+        let liqd = this.add.text(129,29, gameOverMessage, {fill:'#d200ff', fontFamily:'Jersey', fontSize:24, stroke:"#fff"})
+        liqd.setShadow(5, 5, 'rgba(0, 0, 0, 0.5)', 4);
 
-        this.add.text(129,120,`${this.userName} was liquidated `, {fill:'#fff'})
-        this.add.text(129,150,`${this.tradesNo} total Trades `, {fill:'#fff'})
-        var inflation = this.add.text(129,180,`inflation : ${this.inflation} `, {fill:'#fff'})
-        var timeAlive = this.add.text(129,210,`total seconds lived :${this.timeAlive} `, {fill:'#fff'})
-        this.playAgain = this.add.rectangle(232,308,220,70,0xBEBEBE).setOrigin(0.5)
+        this.add.text(129,120,`${this.tradesNo} total Trades `, {fill:'#b041d0',fontFamily:'Jersey', fontSize:16})
+        this.add.text(129,160,`Inflation : ${this.inflation} %`, {fill:'#b041d0',fontFamily:'Jersey', fontSize:16})
+        this.add.text(129,200,`Mental health : ${this.mentalHealth} %`,{fill:'#b041d0',fontFamily:'Jersey', fontSize:16})
+        this.add.text(129,240,`Total seconds lived :${this.timeAlive} `, {fill:'#b041d0',fontFamily:'Jersey', fontSize:16})
+        this.playAgain = this.add.rectangle(250,308,220,70,0xe9c675).setOrigin(0.5)
         this.playAgain.setStrokeStyle(2, 0x006722)        
-        this.playAgainText = this.add.text(232,308,'START', {fill:'#0f0', fontFamily:'Courier' ,fontSize:72})
+        this.playAgainText = this.add.text(250,308,'START', {fill:'#0f0', fontFamily:'Jersey' ,fontSize:72})
         .setOrigin(0.5)
         .setInteractive({useHandCursor : true})
         .on('pointerover', (pointer) => {
@@ -35,7 +47,7 @@ export default class GameIsOver extends Phaser.Scene
         })
         .on('pointerout', (pointer)=>{
 
-            this.playAgain.fillColor = 0xA5A5A5
+            this.playAgain.fillColor = 0xe9c675
         })
         .on('pointerup', () => {
             this.scene.stop();

@@ -1,4 +1,5 @@
 import Phaser from 'phaser'
+import '../styles/fonts.css'
 
 import SuperTraderScene from './scenes/SuperTrader'
 import Preloader from './scenes/Preloader'

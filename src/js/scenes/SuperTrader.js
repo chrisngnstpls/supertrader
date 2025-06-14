@@ -2,6 +2,7 @@ import Phaser from 'phaser'
 import PowerUps from './PowerUp'
 import eventsCenter from './EventsCenter'
 import BlackSwans from './BlackSwan'
+import { LayoutUtils } from '../utils/LayoutUtils'
 export default class SuperTraderScene extends Phaser.Scene
 {
 	constructor()
@@ -14,7 +15,7 @@ export default class SuperTraderScene extends Phaser.Scene
     this.user = {
       userName : data.userName,
       // initMoney : data.money,
-      initMoney : 10,
+      initMoney : 1000,
       initAssets : 0,
       totalTrades : 0,
 
@@ -40,7 +41,8 @@ export default class SuperTraderScene extends Phaser.Scene
     totalTrades : 0,
     powerUpsActive : 'none',
     blackSwansActive:'none',
-    timeAlive:0
+    timeAlive:0,
+    mentalHealth: 100
   };
   // global Timers 
   timer = 0;
@@ -51,6 +53,8 @@ export default class SuperTraderScene extends Phaser.Scene
     powerDownTimer : 0,
     powerUpThreshold : 0,
     powerDownThreshold : 0,
+    powerUpCooldown : 0,
+    powerUpCooldownThreshold : 0
   }
 
   
@@ -147,12 +151,26 @@ export default class SuperTraderScene extends Phaser.Scene
       this.globalSettings.powerUpsUsed.push(incoming)
       this.activeUser.powerUpsActive = this.globalSettings.powerUpsUsed[(this.globalSettings.powerUpsUsed.length)-1]
       this.globalSettings.inflation = this.globalSettings.inflation - incoming.inflationModifier
-      let randomPercent = Math.floor(Math.random()*(10-1)+1)
+      
+      // Add mental health boost (3-15%)
+      const healthBoost = Math.floor(Math.random() * 13) + 3; // Random between 3-15
+      this.activeUser.mentalHealth = Math.min(100, this.activeUser.mentalHealth + healthBoost);
+      console.log(`Mental health boosted by ${healthBoost}%`);
+      
+      // Set power-up cooldown (5-10 seconds)
+      const cooldownTime = Math.floor(Math.random() * (10 - 5 + 1)) + 5
+      this.globalTimers.powerUpCooldownThreshold = cooldownTime
+      this.globalTimers.powerUpCooldown = 0
+      console.log(`Power-up cooldown set to ${cooldownTime} seconds`)
+      
+      // Temporary liquidity trap (not a real bull market)
+      let randomPercent = Math.floor(Math.random()*(5-2)+2) // Reduced from 10-1 to 5-2 for smaller traps
       this.priceMaker(this.maxGlobalPrice,randomPercent,'bull')
-      //console.log('bull random percent : ', randomPercent)
+      //console.log('liquidity trap percent : ', randomPercent)
       this.updateMoney(this.activeUser.money)
       this.updateAssets(this.activeUser.assets)
       this.updatePrice(this.globalPrice);
+      this.updateMentalHealth(); // Update the health bar
       this.scene.resume();
       //console.log('user active powerups : ', this.activeUser.powerUpsActive)
     }, this)
@@ -167,9 +185,9 @@ export default class SuperTraderScene extends Phaser.Scene
       this.activeUser.money = this.activeUser.money - ((this.activeUser.money / 100) * incoming.moneyModifier)
       console.log(incoming.inflationModifier)
       this.globalSettings.inflation = this.globalSettings.inflation + incoming.inflationModifier
-      let randomPercent = Math.floor(Math.random()*(10-1)+1)
+      let randomPercent = Math.floor(Math.random()*(15-10)+10) // Increased from 10-1 to 15-10 for more punishing
       this.priceMaker(this.minGlobalPrice,randomPercent,'bear')
-      //console.log('bull random percent : ', randomPercent)
+      //console.log('bear market percent : ', randomPercent)
       this.updateMoney(this.activeUser.money)
       this.updateAssets(this.activeUser.assets)
       this.updatePrice(this.globalPrice);
@@ -210,6 +228,7 @@ export default class SuperTraderScene extends Phaser.Scene
     this.activeUser.money = this.user.initMoney;
     this.activeUser.totalTrades = this.user.totalTrades;
     this.activeUser.assets = this.user.initAssets;
+    this.activeUser.mentalHealth = 100; // Reset mental health to 100% for new game
     this.globalSettings.inflation = Number(this.initInflation);
     this.globalSettings.inflationPercent = Number(this.initInflationRatio);
     console.log('inside create, setting inflation', this.initInflation, this.initInflationRatio)
@@ -226,20 +245,81 @@ export default class SuperTraderScene extends Phaser.Scene
     const background = map.createLayer('backNew', tileset)
     const foreground = map.createLayer('frontNew', tileset)
 
+    // Initialize layout utility
+    this.layout = new LayoutUtils(this);
+    const positions = this.layout.getLayoutPositions();
+    const fontSizes = this.layout.getFontSizes();
+    const colors = this.layout.getColors();
 
-
-
-
+    // Create text graphics with responsive positioning
+    this.userText = this.add.text(positions.userInfo.x, positions.userInfo.y-2, `User : ${this.user.userName}`, { 
+      fontFamily:'Jersey',
+      fontSize: 22,
+      fill: colors.positive,  
+    });
     
-    // Create text graphics top notch yes fuck unity
-    this.userText = this.add.text(250, 15, `User : ${this.user.userName}`,{ fill: '#0f0' });
-    this.userMoneyText = this.add.text(260, 150, '',{ fill: '#0f0' });
-    this.tradeText = this.add.text(260, 280, '',{ fill: '#0f0' });
-    this.priceText = this.add.text(250, 60, '', {fill : '#0f0', fontSize:20});
-    this.assetsText = this.add.text(260, 220, '', {fill:'#f00'});
-    this.entryPriceText = this.add.text(260, 240, '', {fill:'#f00'});
-    this.tradeSideText = this.add.text(260, 410, '', {fill:'#f00', fontSize:12});
-    this.entryPriceText = this.add.text(260, 340, '', {fill:'#0f0', fontSize:15});
+    this.priceText = this.add.text(positions.price.x, positions.price.y, '', {
+      fill: colors.positive, 
+      fontSize: 20,
+      fontFamily: 'Jersey'
+    });
+    
+    this.userMoneyText = this.add.text(positions.money.x, positions.money.y, '', { 
+      fill: colors.positive, 
+      fontSize: 18,
+      fontFamily: 'Jersey'
+    });
+    
+    this.assetsText = this.add.text(positions.assets.x, positions.assets.y, '', {
+      fill: colors.negative, 
+      fontSize: 18,
+      fontFamily: 'Jersey'
+    });
+    
+    this.tradeText = this.add.text(positions.trades.x, positions.trades.y, '', { 
+      fill: colors.positive, 
+      fontSize: 18,
+      fontFamily: 'Jersey' 
+    });
+    
+    this.entryPriceText = this.add.text(positions.entryPrice.x, positions.entryPrice.y, '', {
+      fill: colors.positive, 
+      fontSize: 18,
+      fontFamily: 'Jersey'
+    });
+    
+    this.tradeSideText = this.add.text(positions.tradeSide.x, positions.tradeSide.y, '', {
+      fill: colors.negative, 
+      fontSize: 18,
+      fontFamily: 'Jersey'
+    });
+    
+    // Create mental health bar under buy/sell buttons
+    const healthBarY = 420;
+    const healthBarX = 12;
+    const healthBarWidth = 200;
+    const healthBarHeight = 20;
+    
+    // Background bar (gray)
+    this.healthBarBg = this.add.graphics();
+    this.healthBarBg.fillStyle(0x333333);
+    this.healthBarBg.fillRect(healthBarX, healthBarY, healthBarWidth, healthBarHeight);
+    
+    // Health bar (colored)
+    this.healthBar = this.add.graphics();
+    
+    // Health percentage text
+    this.healthBarText = this.add.text(
+      healthBarX + healthBarWidth / 2, 
+      healthBarY + healthBarHeight / 2, 
+      '100%', 
+      {
+        fill: '#000000',
+        fontSize: fontSizes.small+5,
+        align: 'center',
+        fontFamily: 'Jersey'
+      }
+    ).setOrigin(0.5, 0.5);
     
     
 
@@ -248,14 +328,14 @@ export default class SuperTraderScene extends Phaser.Scene
     // this.events.on('sidelined', this.sideAnimationPlay, this);
     this.events.on('longed', () => {
       this.downAnimationPlay()
-      this.priceMaker(this.globalPrice, 5, 'bear')
+      this.priceMaker(this.globalPrice, 8, 'bear') // Increased from 5 to 8 for more punishing
       //console.log('firing event bear season from event listener')
     }, this)
 
     this.events.on('shorted', ()=> {
       this.upAnimationPlay()
-      this.priceMaker(this.globalPrice, 5, 'bull')
-      //console.log('firing event bull season from event listener')
+      this.priceMaker(this.globalPrice, 3, 'bull') // Reduced from 5 to 3 for smaller liquidity traps
+      //console.log('firing event liquidity trap from event listener')
     }, this)
 
     this.events.on('sidelined', ()=>{
@@ -263,8 +343,12 @@ export default class SuperTraderScene extends Phaser.Scene
       //this.priceMaker(this.globalPrice, 5, 'crab')
     },this)
     
-    // create buy button and logic
-    this.buyButton = this.add.text(55, 395, 'BUY', { fill: '#0f0', fontSize:20 })
+    // create buy button and logic with responsive positioning
+    this.buyButton = this.add.text(positions.buyButton.x+2, positions.buyButton.y-5, 'BUY', { 
+      fill: colors.positive, 
+      fontSize: fontSizes.button+10,
+      fontFamily: 'Micro' 
+    })
       .setInteractive({ useHandCursor: true })
       .on('pointerup', () => {
         
@@ -283,8 +367,12 @@ export default class SuperTraderScene extends Phaser.Scene
         this.updateTrades(bata);
     });
     
-    //crete sell button and logic
-    this.sellButton = this.add.text(145, 395, 'SELL', { fill: '#f00', fontSize:20 })
+    //create sell button and logic with responsive positioning
+    this.sellButton = this.add.text(positions.sellButton.x+2, positions.sellButton.y-5, 'SELL', { 
+      fill: colors.negative, 
+      fontSize: fontSizes.button +10,
+      fontFamily: 'Micro'
+    })
     .setInteractive({ useHandCursor : true })
     .on('pointerup', () => {
       
@@ -306,14 +394,15 @@ export default class SuperTraderScene extends Phaser.Scene
     });
     
   
-  //run once to generate init texts
-    this.add.sprite(113,165,'sideOnly').play('sideAnimation')
+  //run once to generate init texts with responsive character positioning
+    this.add.sprite(positions.character.x, positions.character.y,'sideOnly').play('sideAnimation')
     this.updateTradeText();
     this.updateMoney(this.user.initMoney);
     this.updatePrice(this.initPrice);
     this.updateAssets(this.user.initAssets);
     this.updateTradeSideText();
     this.updateEntryPriceText();
+    this.updateMentalHealth();
     // eventsCenter.emit('userData', this.activeUser)
     // eventsCenter.emit('blackSwanIncoming', this.activeUser)
     
@@ -332,8 +421,11 @@ export default class SuperTraderScene extends Phaser.Scene
     this.globalTimers.timer += delta;
     this.globalTimers.powerUpTimer += delta;
     this.globalTimers.powerDownTimer += delta;
+    this.globalTimers.powerUpCooldown += delta;
     
-    if (this.globalTimers.powerUpTimer >= (this.globalTimers.powerUpThreshold * 1000)){
+    // Power-up event with cooldown check
+    if (this.globalTimers.powerUpTimer >= (this.globalTimers.powerUpThreshold * 1000) && 
+        this.globalTimers.powerUpCooldown >= (this.globalTimers.powerUpCooldownThreshold * 1000)){
           
           this.createWindow(PowerUps)
           eventsCenter.emit('userData', this.activeUser)
@@ -361,7 +453,10 @@ export default class SuperTraderScene extends Phaser.Scene
       this.globalSettings.inflation = Math.abs(this.globalSettings.inflation + localRatio)
       console.log('inflation:',this.globalSettings.inflation)
       this.activeUser.money = this.calculateMoney(this.activeUser.money, this.globalSettings.inflation)
+      // Update mental health based on inflation
+      this.activeUser.mentalHealth = this.calculateMentalHealth(this.activeUser.mentalHealth, this.globalSettings.inflation)
       this.updateMoney()
+      this.updateMentalHealth()
       this.updatePrice(this.globalPrice);
       this.globalTimers.timer -= moddedTimer
 
@@ -373,11 +468,11 @@ export default class SuperTraderScene extends Phaser.Scene
       const powerUpRandomTimer = Math.floor(Math.random() * 60 - 10 + 1) + 10
       this.globalTimers.powerUpThreshold = powerUpRandomTimer
     } else if (whatTimer == 'powerDown'){
-      const powerDownRandomTimer = Math.floor(Math.random() * 60 - 10 + 1) + 10
+      const powerDownRandomTimer = Math.floor(Math.random() * 30 - 5 + 1) + 5 // Reduced from 60-10 to 30-5 for more frequent black swans
       this.globalTimers.powerDownThreshold = powerDownRandomTimer
     } else if (whatTimer == 'all'){     
       const powerUpRandomTimer = Math.floor(Math.random() * 60 - 10 + 1) + 10
-      const powerDownRandomTimer = Math.floor(Math.random() * 60 - 10 + 1) + 10
+      const powerDownRandomTimer = Math.floor(Math.random() * 30 - 5 + 1) + 5 // More frequent black swans
       this.globalTimers.powerUpThreshold = powerUpRandomTimer
       this.globalTimers.powerDownThreshold = powerDownRandomTimer
 
@@ -510,13 +605,16 @@ export default class SuperTraderScene extends Phaser.Scene
     }
   }
   downAnimationPlay(){
-    this.add.sprite(113,165, 'downOnly').play('downAnimation')
+    const positions = this.layout.getLayoutPositions();
+    this.add.sprite(positions.character.x, positions.character.y, 'downOnly').play('downAnimation')
   }
   upAnimationPlay(){
-    this.add.sprite(113,165, 'upOnly').play('upAnimation')
+    const positions = this.layout.getLayoutPositions();
+    this.add.sprite(positions.character.x, positions.character.y, 'upOnly').play('upAnimation')
   }
   sideAnimationPlay(){
-    this.add.sprite(113,165, 'sideOnly').play('sideAnimation')
+    const positions = this.layout.getLayoutPositions();
+    this.add.sprite(positions.character.x, positions.character.y, 'sideOnly').play('sideAnimation')
   }
   blackSwanEngage(){
     this.createWindow(BlackSwans)
@@ -527,6 +625,50 @@ export default class SuperTraderScene extends Phaser.Scene
     let _localPercentage = (_localMoney / 100) * _localInflation
     let _finalMoney = _localMoney - _localPercentage
     return Number(_finalMoney)
+  }
+  
+  calculateMentalHealth(currentHealth, infl){
+    let _localHealth = Number(currentHealth)
+    let _localInflation = Number(infl)
+    // Mental health deteriorates at 0.25x the rate of inflation (4 times slower)
+    let _localPercentage = (_localHealth / 100) * (_localInflation * 0.25)
+    let _finalHealth = _localHealth - _localPercentage
+    // Ensure mental health doesn't go below 0
+    return Math.max(0, Number(_finalHealth))
+  }
+  
+  updateHealthBar(){
+    const positions = this.layout.getLayoutPositions();
+    const healthBarY = 420;
+    const healthBarX = 12;
+    const healthBarWidth = 200;
+    const healthBarHeight = 20;
+    
+    // Calculate health percentage and bar width
+    const healthPercent = Math.max(0, Math.min(100, this.activeUser.mentalHealth)) / 100;
+    const barWidth = healthBarWidth * healthPercent;
+    
+    // Determine bar color based on health level
+    let barColor = 0x00FF00; // Green (100-60%)
+    if (this.activeUser.mentalHealth < 60) {
+      barColor = 0xFFFF00; // Yellow (59-26%)
+    }
+    if (this.activeUser.mentalHealth < 25) {
+      barColor = 0xFF0000; // Red (25% and below)
+    }
+    
+    // Clear and redraw the health bar
+    this.healthBar.clear();
+    this.healthBar.fillStyle(barColor);
+    this.healthBar.fillRect(healthBarX, healthBarY, barWidth, healthBarHeight);
+    
+    // Update percentage text with appropriate color for contrast
+    const textColor = (this.activeUser.mentalHealth < 60) ? '#000000' : '#FFFFFF';
+    this.healthBarText.setFill(textColor);
+    this.healthBarText.setText(`${Math.round(this.activeUser.mentalHealth)}%`);
+  }
+  updateMentalHealth(){
+    this.updateHealthBar();
   }
   createWindow(func){
     var x = Phaser.Math.Between(400,600)
@@ -551,9 +693,12 @@ export default class SuperTraderScene extends Phaser.Scene
   isGameOver(moneyData, assetData){
     let _localMoney = Number(moneyData)
     let _localAssets = Number(assetData)
-    if ((_localMoney < 0.01) && (_localAssets < 0.01)){
+    let _mentalHealth = Number(this.activeUser.mentalHealth)
+    
+    // Game over if mental health reaches 0 OR both money and assets are depleted
+    if (_mentalHealth <= 0 || ((_localMoney < 0.01) && (_localAssets < 0.01))){
       this.scene.stop()
-      console.log('game over')
+      console.log('game over - mental health:', _mentalHealth, 'money:', _localMoney, 'assets:', _localAssets)
       if (this.ambience) {
         this.ambience.stop()
       }
@@ -562,14 +707,9 @@ export default class SuperTraderScene extends Phaser.Scene
         userDetails: this.activeUser, 
         tradeDetails: this.allTrades, 
         timeAlive: this.activeUser.timeAlive,
-        inflation: this.globalSettings.inflation
+        inflation: this.globalSettings.inflation,
+        mentalHealth: this.activeUser.mentalHealth
       }
-      // this.scene.launch('GameOver', {
-      //   userDetails:this.activeUser, 
-      //   tradeDetails:this.allTrades, 
-      //   timeAlive:this.activeUser.timeAlive,
-      //   inflation:this.globalSettings.inflation
-      // })
       this.allTrades = []
       this.scene.launch('GameOver', dataObject)
     } else if ((_localMoney >= 0.1) || (_localAssets >= 0.1)){

@@ -60,15 +60,15 @@ export default class Title extends Phaser.Scene{
         this.backRect = this.add.rectangle(232,232,230,500,0xA5A5A5).setOrigin(0.5)
         this.backRect.alpha = 0.6
         this.backRect.setStrokeStyle(2,0x006722)
-        this.add.text(200, 390,'Name : ',{ font: '32px Courier', fill: '#0f0' }).setOrigin(0.5)
+        this.add.text(190, 390,'Name : ',{ fontFamily: 'Jersey', fontSize: 32, fill: '#0f0' }).setOrigin(0.5)
         this.startBox = this.add.rectangle(232,308,220,70,0xBEBEBE).setOrigin(0.5)
         this.startBox.setStrokeStyle(2, 0x006722)
-        this.textBox = this.add.rectangle(300, 392,90,20).setOrigin(0.5)
+        this.textBox = this.add.rectangle(280, 392,90,20).setOrigin(0.5)
         this.textBox.setStrokeStyle(1, 0x006722)
         this.startBox.alpha=0.5
-        var textEntry =  this.add.text(300, 392,'',{ fontFamily: 'Courier', fill: '#00ff08',fontSize:24 }).setOrigin(0.5)
+        var textEntry =  this.add.text(281, 391,'',{ fontFamily: 'Jersey', fill: '#f800ff',fontSize:24 }).setOrigin(0.5)
         textEntry.alpha = 0.5
-        this.startText = this.add.text(232,308,'START', {fill:'#0f0', fontFamily:'Courier' ,fontSize:72})
+        this.startText = this.add.text(232,308,'START', {fill:'#0f0', fontFamily:'Jersey' ,fontSize:72})
         .setOrigin(0.5)
         .setInteractive({useHandCursor : true})
         .on('pointerover', (pointer) => {
@@ -114,4 +114,3 @@ export default class Title extends Phaser.Scene{
         });
     }
 }
-

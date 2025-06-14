@@ -38,7 +38,7 @@ export default class PowerUps extends Phaser.Scene
     }, this)
 
     let toolTip =  this.add.rectangle( 0, 0, 75, 25, 0xff0000).setOrigin(0.5);
-    let toolTipText = this.add.text( 0, 0, '', { fontFamily: 'Arial', color: '#fff' }).setOrigin(0.5);
+    let toolTipText = this.add.text( 0, 0, '', { fontFamily: 'Jersey', color: '#fff' }).setOrigin(0.5);
     toolTip.alpha = 0;
     this.input.setPollOnMove();
     this.input.on('gameobjectover', function (pointer, gameObject) {
@@ -57,14 +57,8 @@ export default class PowerUps extends Phaser.Scene
       toolTip.alpha = 0;
       toolTipText.alpha = 0;
     });
-    // objectWithToolTip.on('pointermove', function (pointer) {
-    //   toolTip.x = pointer.x;
-    //   toolTip.y = pointer.y;
-    //   toolTipText.x = pointer.x + 5;
-    //   toolTipText.y = pointer.y + 5;
-    // });
-    
-    const powerUpText = this.add.text(45,25,'SELECT').setOrigin(0)
+ 
+    const powerUpText = this.add.text(50,25,'SELECT',{fontFamily:'Jersey', fontSize:18}).setOrigin(0)
     const powerUpWindow = this.add.image(0,0,'powerupWindow').setOrigin(0)
     const allPowerUps = this.createPowerUps()
     
@@ -204,7 +198,7 @@ export default class PowerUps extends Phaser.Scene
     let speedModifiers = [1.2, 1.5, 1.5, 1.05, 2, 1.3]
     let moneyModifiers = [3.3 ,1.5, 1.4, 1.1, 2, 1.2]
     let inflationModifiers = [1, 1.5, 2, 1.67, 3, 2.1]
-    let info = ['When in doubt...','Call the connect','So I have a friend...','Make it all back','Beep Bop','Magic Internet Money']
+    let info = ['When in doubt...','Call the connect','So I have a friend...','Make it all back','Beep Bop','Magic Internet Money', 'Raining money bruh']
 
     for (let i in powerUpsList) {
       let localPowerUp = new this.powerUpConstruct

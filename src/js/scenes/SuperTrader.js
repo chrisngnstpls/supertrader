@@ -5,12 +5,58 @@ import BlackSwans from './BlackSwan'
 import { LayoutUtils } from '../utils/LayoutUtils'
 export default class SuperTraderScene extends Phaser.Scene
 {
-	constructor()
-	{
-		super('SuperTrader')
+  constructor()
+  {
+    super('SuperTrader')
     this.count = 0
     this.trend = 'sideways'
-	}
+  }
+  
+  resetGameState() {
+    // Reset all game state variables
+    this.timer = 0;
+    this.allTrades = [];
+    this.activeUser = {
+      userName: '',
+      money: 0,
+      assets: 0,
+      totalTrades: 0,
+      powerUpsActive: 'none',
+      blackSwansActive: 'none',
+      timeAlive: 0,
+      mentalHealth: 100
+    };
+    this.globalTimers = {
+      timer: 0,
+      powerUpTimer: 0,
+      powerDownTimer: 0,
+      powerUpThreshold: 0,
+      powerDownThreshold: 0,
+      powerUpCooldown: 0,
+      powerUpCooldownThreshold: 0
+    };
+    this.globalSettings = {
+      priceModifier: 1,
+      timeModifier: 1,
+      powerUpsUsed: [],
+      blackSwansUsed: [],
+      inflation: 0,
+      inflationPercent: 1
+    };
+    this.trade = {
+      id: 0,
+      side: '',
+      active: '',
+      amount: 0,
+      priceIn: 0.0,
+      priceOut: 0.0,
+      profit: 0.0,
+      info: ''
+    };
+    this.globalPrice = 0.0;
+    this.maxGlobalPrice = 0.0;
+    this.minGlobalPrice = 0.0;
+  }
   init(data){
     this.user = {
       userName : data.userName,
@@ -123,6 +169,9 @@ export default class SuperTraderScene extends Phaser.Scene
   }
   
   create() {
+    // Reset game state before starting
+    this.resetGameState();
+    
     //import audio effects
     this.gameOverMusic = this.sound.add('gameOverMusic')
     this.powerUpPopUpSound = this.sound.add('chaChing', 1)
@@ -158,7 +207,7 @@ export default class SuperTraderScene extends Phaser.Scene
       console.log(`Mental health boosted by ${healthBoost}%`);
       
       // Set power-up cooldown (5-10 seconds)
-      const cooldownTime = Math.floor(Math.random() * (10 - 5 + 1)) + 5
+      const cooldownTime = Math.floor(Math.random() * (8 - 5 + 1)) + 5
       this.globalTimers.powerUpCooldownThreshold = cooldownTime
       this.globalTimers.powerUpCooldown = 0
       console.log(`Power-up cooldown set to ${cooldownTime} seconds`)
@@ -582,13 +631,13 @@ export default class SuperTraderScene extends Phaser.Scene
     this.tradeText.setText(`Total Trades :  ${this.allTrades.length}`);
   }
   updateMoney(){
-    this.userMoneyText.setText(`Money : ${this.activeUser.money.toFixed(2)}`)
+    this.userMoneyText.setText(`Money : $ ${this.activeUser.money.toFixed(2)}`)
   }
   updateAssets(){
     this.assetsText.setText(`Assets : ${this.activeUser.assets.toFixed(2)}`)
   }
   updatePrice(priceNew){
-    this.priceText.setText(`Price : ${priceNew}`)
+    this.priceText.setText(`Price : $ ${priceNew}`)
     this.priceTick.play()
   }
   updateTradeSideText(){

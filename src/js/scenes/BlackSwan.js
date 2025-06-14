@@ -40,7 +40,7 @@ export default class BlackSwansie extends Phaser.Scene
             this.scene.remove()
         })
     })
-    const blackSwanText = this.add.text(25, 30, `${randomSwan.text}`,{fill: '#f00', fontSize:12, align:'center'}).setOrigin(0.5);
+    const blackSwanText = this.add.text(25, 30, `${randomSwan.text}`,{fill: '#f00', fontSize:16, align:'center', fontFamily:'Jersey'}).setOrigin(0.5);
     const windowContainer = this.add.container(50,50,[blackSwanWindow, blackSwan,blackSwanText])
     blackSwanText.setX(75)
     blackSwanText.setY(37)

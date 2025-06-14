@@ -36,9 +36,10 @@ export default class GameIsOver extends Phaser.Scene
         this.add.text(129,160,`Inflation : ${this.inflation} %`, {fill:'#b041d0',fontFamily:'Jersey', fontSize:16})
         this.add.text(129,200,`Mental health : ${this.mentalHealth} %`,{fill:'#b041d0',fontFamily:'Jersey', fontSize:16})
         this.add.text(129,240,`Total seconds lived :${this.timeAlive} `, {fill:'#b041d0',fontFamily:'Jersey', fontSize:16})
-        this.playAgain = this.add.rectangle(250,308,220,70,0xe9c675).setOrigin(0.5)
+        let endButton = this.playAgain = this.add.rectangle(250,308,220,70,0xe9c675).setOrigin(0.5)
+        endButton.setAlpha(0.6)
         this.playAgain.setStrokeStyle(2, 0x006722)        
-        this.playAgainText = this.add.text(250,308,'START', {fill:'#0f0', fontFamily:'Jersey' ,fontSize:72})
+        this.playAgainText = this.add.text(250,308,'MENU', {fill:'#0f0', fontFamily:'Jersey' ,fontSize:72})
         .setOrigin(0.5)
         .setInteractive({useHandCursor : true})
         .on('pointerover', (pointer) => {

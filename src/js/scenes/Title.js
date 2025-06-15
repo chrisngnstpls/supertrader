@@ -79,6 +79,9 @@ export default class Title extends Phaser.Scene{
             this.startBox.fillColor = 0xA5A5A5
         })
         .on('pointerup', () => {
+            // Record start time in registry
+            this.registry.set('gameStartTime', Date.now());
+            
             if (textEntry._text ==''){
                 this.scene.launch('SuperTrader', {money:this.money, userName:'SuperTrader'})
                 bgTrack.stop()

@@ -10,12 +10,14 @@ export default class SuperTraderScene extends Phaser.Scene
     super('SuperTrader')
     this.count = 0
     this.trend = 'sideways'
+    this.gamePausedAt = 0; // Track when game was paused
   }
   
   resetGameState() {
     // Reset all game state variables
     this.timer = 0;
     this.allTrades = [];
+    this.timeAliveSeconds = 0; // Add new time tracking variable
     this.activeUser = {
       userName: '',
       money: 0,
@@ -56,6 +58,7 @@ export default class SuperTraderScene extends Phaser.Scene
     this.globalPrice = 0.0;
     this.maxGlobalPrice = 0.0;
     this.minGlobalPrice = 0.0;
+    this.gamePausedAt = 0;
   }
   init(data){
     this.user = {
@@ -220,6 +223,13 @@ export default class SuperTraderScene extends Phaser.Scene
       this.updateAssets(this.activeUser.assets)
       this.updatePrice(this.globalPrice);
       this.updateMentalHealth(); // Update the health bar
+      
+      // Resume the game and adjust timers for pause duration
+      const pauseDuration = this.time.now - this.gamePausedAt;
+      this.globalTimers.powerUpTimer += pauseDuration;
+      this.globalTimers.powerDownTimer += pauseDuration;
+      this.globalTimers.timer += pauseDuration;
+      
       this.scene.resume();
       //console.log('user active powerups : ', this.activeUser.powerUpsActive)
     }, this)
@@ -240,6 +250,13 @@ export default class SuperTraderScene extends Phaser.Scene
       this.updateMoney(this.activeUser.money)
       this.updateAssets(this.activeUser.assets)
       this.updatePrice(this.globalPrice);
+      
+      // Resume the game and adjust timers for pause duration
+      const pauseDuration = this.time.now - this.gamePausedAt;
+      this.globalTimers.powerUpTimer += pauseDuration;
+      this.globalTimers.powerDownTimer += pauseDuration;
+      this.globalTimers.timer += pauseDuration;
+      
       this.scene.resume();
       //console.log('user active blackSwans : ', this.activeUser.blackSwansActive)
     }, this)
@@ -458,11 +475,24 @@ export default class SuperTraderScene extends Phaser.Scene
   }
   
   
+  shutdown() {
+    // Clean up resources when the scene is shut down
+    eventsCenter.off('powerUpActivated');
+    eventsCenter.off('blackSwanActivated');
+    this.timeAliveSeconds = 0;
+    this.globalTimers.timer = 0;
+    this.globalTimers.powerUpTimer = 0;
+    this.globalTimers.powerDownTimer = 0;
+  }
+
   update(time, delta){
     //maybe logic
     
     this.isGameOver(this.activeUser.money, this.activeUser.assets)
-    this.activeUser.timeAlive = time
+    // Accumulate time alive in seconds (delta is in ms)
+    this.timeAliveSeconds += delta;
+    this.activeUser.timeAlive = this.timeAliveSeconds / 1000;
+    
     if ((this.minGlobalPrice || this.globalPrice) <= 0.001) {
       this.priceMaker(this.globalPrice, 20, 'bull')
     }
@@ -734,6 +764,8 @@ export default class SuperTraderScene extends Phaser.Scene
       demo.refresh()
     });
 
+    // Store current time to offset timers when unpaused
+    this.gamePausedAt = this.time.now;
     this.scene.add(handle,demo,true)
     this.scene.pause()
     

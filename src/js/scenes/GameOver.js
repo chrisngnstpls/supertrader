@@ -12,7 +12,12 @@ export default class GameIsOver extends Phaser.Scene
         this.userName = data.userDetails.userName
         this.tradesNo = (data.tradeDetails).length
         this.inflation = (data.inflation).toFixed(2)
-        this.timeAlive = (data.timeAlive / 1000).toFixed(2)
+        
+        // Get start time from registry and calculate elapsed time
+        const startTime = this.registry.get('gameStartTime');
+        const elapsedTime = (Date.now() - startTime) / 1000;
+        this.timeAlive = elapsedTime.toFixed(2);
+        
         this.mentalHealth = data.mentalHealth ? data.mentalHealth.toFixed(1) : 0
         this.gameOverReason = data.mentalHealth <= 0 ? 'mental' : 'liquidated'
     }
@@ -51,14 +56,11 @@ export default class GameIsOver extends Phaser.Scene
             this.playAgain.fillColor = 0xe9c675
         })
         .on('pointerup', () => {
+            // Stop the SuperTrader scene if it's still running
+            this.scene.stop('SuperTrader');
             this.scene.stop();
-            this.game.sound.stopAll()
-            this.data.tradeDetails = []
-            console.log(this.data.tradeDetails)
-            this.scene.launch('Title', {money:1000, userName:this.userName})
-              
-            //menuAccept.play()
-
+            this.game.sound.stopAll();
+            this.scene.launch('Title', {money:1000, userName:this.userName});
         })
 
     }
